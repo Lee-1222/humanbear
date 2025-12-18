@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本熊害：人熊互動與適應性管理轉向</title>
+    <style>
+        :root {
+            --ink: #1f2a1f;
+            --paper: #f7f7f5;
+            --card: #ffffff;
+            --accent: #d96c5b;
+            --accent-2: #4a6b46;
+            --muted: #5f615d;
+            --shadow: 0 14px 32px rgba(0,0,0,0.08);
+            --hero-img: url('https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?auto=format&fit=crop&w=2000&q=85');
+            --font-title: "DM Sans", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+            --font-body: "Work Sans", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-body);
+            line-height: 1.8;
+            letter-spacing: 0.1px;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-title);
+            margin: 0 0 0.8rem;
+            color: var(--ink);
+        }
+
+        p { margin: 0 0 1.3rem; text-align: justify; }
+        strong { color: var(--accent-2); font-weight: 700; }
+        a { color: var(--accent-2); }
+
+        .page-wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.8rem 4rem; }
+
+        /* Hero */
+        .hero {
+            background: #2f4630;
+            color: #fff;
+            padding: 4rem 1.8rem 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(115deg, rgba(18,28,18,0.78) 18%, rgba(18,28,18,0.58) 42%, rgba(18,28,18,0.65) 100%), var(--hero-img);
+            background-size: cover;
+            background-position: center;
+            filter: saturate(1.05);
+            z-index: 1;
+        }
+        .hero-inner { position: relative; z-index: 2; max-width: 1180px; margin: 0 auto; }
+        .hero h1 { font-size: clamp(2rem, 3vw, 2.8rem); color: #fff; }
+        .hero-sub { max-width: 720px; color: #e8eee6; font-size: 1.05rem; }
+        .tagline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(255,255,255,0.14);
+            padding: 0.55rem 1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.18);
+            margin-bottom: 1rem;
+        }
+
+        /* Floating TOC */
+        .toc {
+            position: sticky;
+            top: 1.2rem;
+            align-self: start;
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 16px;
+            padding: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+        .toc h4 { margin-top: 0; font-size: 1rem; color: var(--muted); letter-spacing: 0.5px; }
+        .toc a { display: block; color: var(--ink); text-decoration: none; margin: 0.3rem 0; font-size: 0.95rem; }
+        .toc a:hover { color: var(--accent); }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 2.2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .section {
+            margin: 3rem 0;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 1.8rem;
+        }
+        .section-header h2 { font-size: 1.6rem; border-left: 8px solid var(--accent); padding-left: 0.9rem; }
+        .section-header p { color: var(--muted); margin-top: 0.6rem; }
+
+        /* Flip pages for section 2 */
+        .flipbook {
+            position: relative;
+            min-height: 420px;
+        }
+        .page {
+            position: absolute;
+            inset: 0;
+            background: #fff;
+            border-radius: 14px;
+            padding: 1.8rem;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: rotateY(-10deg) translateY(6px);
+            transform-origin: left center;
+            transition: opacity 0.45s ease, transform 0.45s ease;
+            max-height: 70vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-2) #f0f0f0;
+        }
+        .page.active {
+            opacity: 1;
+            transform: rotateY(0deg) translateY(0);
+            z-index: 2;
+        }
+        .page .label { text-transform: none; letter-spacing: 0.5px; color: var(--ink); font-size: 1.15rem; font-weight: 700; margin-bottom: 0.6rem; }
+        .page::-webkit-scrollbar { width: 8px; }
+        .page::-webkit-scrollbar-track { background: #f0f0f0; }
+        .page::-webkit-scrollbar-thumb { background: var(--accent-2); border-radius: 999px; }
+        .page-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.2rem;
+            gap: 1rem;
+        }
+        .page-btn {
+            background: var(--accent-2);
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(60,110,113,0.25);
+        }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-dots { display: flex; gap: 0.5rem; }
+        .page-dots button {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: none;
+            background: #dcd5c9;
+            cursor: pointer;
+        }
+        .page-dots button.active { background: var(--accent); }
+
+        .factor-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+        .factor-chip {
+            border: 1px solid rgba(0,0,0,0.12);
+            background: #eef2ed;
+            color: var(--ink);
+            padding: 0.55rem 0.9rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .factor-chip.active { background: var(--accent-2); color: #fff; border-color: var(--accent-2); }
+        .progress-track { width: 100%; height: 8px; background: #e6e1d9; border-radius: 999px; overflow: hidden; margin-bottom: 1.2rem; }
+        .progress-bar { height: 100%; width: 0%; background: var(--accent); border-radius: 999px; transition: width 0.3s ease; }
+
+        /* Footer */
+        .site-footer {
+            text-align: center;
+            color: #6b6f69;
+            font-size: 0.95rem;
+            padding: 2rem 1rem 3rem;
+        }
+
+        /* Debate canvas (section 3) */
+        .debate-canvas {
+            margin-top: 1rem;
+            background: #f8f5ec;
+            border: 1px solid #e7e0d7;
+            border-radius: 16px;
+            padding: 1.4rem;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.05);
+        }
+        .debate-nav {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+        .debate-chip {
+            border: 1px solid rgba(0,0,0,0.12);
+            background: #fff;
+            color: var(--ink);
+            padding: 0.55rem 0.95rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 650;
+            transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .debate-chip:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .debate-chip.active { background: var(--accent-2); color: #fff; border-color: var(--accent-2); }
+        .debate-controls { display: flex; align-items: center; gap: 0.75rem; justify-content: space-between; flex-wrap: wrap; margin-bottom: 0.75rem; }
+        .debate-hint { color: var(--muted); font-size: 0.95rem; }
+        .debate-ctrl-btn {
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            padding: 0.55rem 0.95rem;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(69,126,127,0.25);
+        }
+        .debate-progress { width: 100%; height: 6px; background: #e6e1d9; border-radius: 999px; overflow: hidden; margin-bottom: 1rem; }
+        .debate-progress-bar { height: 100%; width: 0%; background: var(--accent-2); transition: width 0.25s ease; }
+        .debate-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .debate-card {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 14px;
+            padding: 1.1rem 1.1rem 0.4rem;
+            position: relative;
+            overflow: hidden;
+            border-left: 6px solid var(--accent-2);
+            transition: box-shadow 0.25s ease, transform 0.15s ease, border-left-color 0.2s ease;
+        }
+        .debate-card:hover { transform: translateY(-1px); box-shadow: 0 12px 35px rgba(0,0,0,0.08); }
+        .debate-card:not(.active) { border-left-color: #dcd5c9; }
+        .debate-head { display: flex; align-items: flex-start; gap: 0.75rem; justify-content: space-between; flex-wrap: wrap; }
+        .debate-head h3 { margin: 0; font-size: 1.2rem; }
+        .debate-head { cursor: pointer; }
+        .debate-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .debate-tag { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.65rem; border-radius: 999px; background: #f1e8dd; color: var(--ink); font-size: 0.85rem; border: 1px solid rgba(0,0,0,0.05); }
+        .debate-body { margin-top: 0.85rem; max-height: 1600px; transition: max-height 0.35s ease, opacity 0.35s ease; }
+        .debate-card:not(.active) .debate-body { max-height: 0; opacity: 0; pointer-events: none; }
+        .debate-card .pill { background: #eaf2ee; }
+        .debate-meta { font-size: 0.9rem; color: var(--muted); }
+
+        /* Adaptive management accordion (section 4) */
+        .adaptive-intro {
+            background: linear-gradient(135deg, rgba(74,107,70,0.08) 0%, rgba(217,108,91,0.06) 100%);
+            border-left: 4px solid var(--accent-2);
+            padding: 1.5rem 1.8rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        .adaptive-body h3 {
+            background: linear-gradient(135deg, rgba(74,107,70,0.12) 0%, rgba(217,108,91,0.08) 100%);
+            border-left: 5px solid var(--accent-2);
+            padding: 0.9rem 1rem 0.9rem 1.2rem;
+            margin: 1.8rem 0 0.8rem -2.2rem;
+            width: calc(100% + 4.4rem);
+            font-size: 1.15rem;
+            color: var(--accent-2);
+        }
+
+        /* Management Accordion */
+        .management-accordion { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+        .management-item { background: #f9f7f3; border: 1px solid #e8e0d8; border-radius: 12px; overflow: hidden; }
+        .management-header { 
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1.2rem 1.4rem;
+            background: linear-gradient(135deg, rgba(74,107,70,0.12) 0%, rgba(217,108,91,0.08) 100%);
+            cursor: pointer;
+            border-left: 5px solid var(--accent-2);
+            transition: all 0.25s ease;
+            user-select: none;
+        }
+        .management-header:hover { background: linear-gradient(135deg, rgba(74,107,70,0.18) 0%, rgba(217,108,91,0.12) 100%); }
+        .management-header h3 { margin: 0; font-size: 1.1rem; color: var(--accent-2); flex: 1; }
+        .management-toggle { 
+            font-size: 1.4rem; color: var(--accent-2); font-weight: 700;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            margin-left: 1rem;
+        }
+        .management-item.active .management-toggle { transform: rotate(45deg); }
+        .management-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            background: #fff;
+        }
+        .management-item.active .management-body { max-height: 3000px; padding: 1.4rem 1.4rem; }
+        .management-body p, .management-body table { margin: 1rem 0; }
+        .management-body table { width: 100%; }
+        .accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .accordion-item {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: box-shadow 0.25s ease;
+        }
+        .accordion-item:hover {
+            box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+        }
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.3rem 1.6rem;
+            cursor: pointer;
+            background: linear-gradient(135deg, #f9f6ef 0%, #fff 100%);
+            border-bottom: 1px solid transparent;
+            transition: all 0.25s ease;
+        }
+        .accordion-item.active .accordion-header {
+            background: linear-gradient(135deg, var(--accent-2) 0%, #5a7d56 100%);
+            color: #fff;
+            border-bottom-color: rgba(255,255,255,0.15);
+        }
+        .accordion-icon {
+            width: 2.6rem;
+            height: 2.6rem;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            transition: all 0.25s ease;
+        }
+        .accordion-item.active .accordion-icon {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.05);
+        }
+        .accordion-title {
+            flex: 1;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--ink);
+            transition: color 0.25s ease;
+        }
+        .accordion-item.active .accordion-title {
+            color: #fff;
+        }
+        .accordion-toggle {
+            width: 1.8rem;
+            height: 1.8rem;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .accordion-item.active .accordion-toggle {
+            background: rgba(255,255,255,0.2);
+            transform: rotate(180deg);
+        }
+        .accordion-toggle::before {
+            content: "▼";
+            font-size: 0.75rem;
+            color: var(--muted);
+            transition: color 0.25s ease;
+        }
+        .accordion-item.active .accordion-toggle::before {
+            color: #fff;
+        }
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .accordion-item.active .accordion-body {
+            max-height: 6000px;
+        }
+        .accordion-content {
+            padding: 1.8rem 1.6rem;
+            padding-left: 4.2rem;
+        }
+
+        /* Grid + highlights */
+        .pill { display: inline-block; padding: 0.2rem 0.75rem; border-radius: 999px; background: #f1e8dd; color: var(--ink); font-size: 0.85rem; margin-right: 0.4rem; }
+        .list-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 1rem; }
+        .mini-card { padding: 1rem 1.2rem; background: #f9f6ef; border-radius: 12px; border: 1px solid rgba(0,0,0,0.04); }
+        .quote {
+            border-left: 5px solid var(--accent-2);
+            padding-left: 1rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin: 1.4rem 0; }
+        th, td { border: 1px solid #e4ded3; padding: 0.9rem 0.75rem; text-align: left; }
+        th { background: #1f2f34; color: #fff; }
+        tr:nth-child(even) { background: #f7f2eb; }
+
+        /* Footnotes */
+        .footnotes { background: #111; color: #eee; padding: 1.6rem 1.6rem 2rem; border-radius: 14px; }
+        .footnotes a { color: #8cd0ff; word-break: break-all; overflow-wrap: break-word; }
+        .footnotes li { margin: 0.5rem 0; line-height: 1.6; }
+
+        /* References (collapsible) */
+        .refs-section { margin-top: 2rem; }
+        .refs-panel { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; overflow: hidden; background: #0d0d0d; }
+        .refs-panel summary { cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.5rem; background: #111; color: #fff; list-style: none; user-select: none; }
+        .refs-panel summary::-webkit-details-marker { display: none; }
+        .refs-summary-text h2 { margin: 0; font-size: 1.3rem; color: #fff; }
+        .refs-summary-text p { margin: 0.2rem 0 0; color: #bbb; }
+        .refs-toggle { font-size: 1.2rem; transition: transform 0.2s ease; }
+        .refs-panel[open] .refs-toggle { transform: rotate(45deg); }
+        .refs-body { padding: 1.4rem 1.6rem 2rem; color: #eee; background: #0d0d0d; }
+        .refs-body h3 { margin-top: 1.2rem; margin-bottom: 0.6rem; color: #f3e8d8; }
+        .refs-body ul { margin: 0 0 0.6rem 1.2rem; padding: 0; }
+        .refs-body li { margin: 0.35rem 0; line-height: 1.5; word-break: break-all; overflow-wrap: break-word; }
+        .refs-body a { color: #8cd0ff; word-break: break-all; overflow-wrap: break-word; }
+
+        /* Responsive */
+        @media (max-width: 980px) {
+            .section { grid-template-columns: 1fr; }
+            .toc { position: relative; top: 0; }
+            .page-wrap { padding: 0 1.2rem 3rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-inner">
+            <h1>日本熊害：人熊互動與適應性管理轉向</h1>
+            <p class="hero-sub">日本熊害頻傳，並非「野性反撲」，而是人口老化、獵人崩解與里山荒廢下的社會縮影。當撲殺無法止住恐懼，該如何透過「適應性管理」，在界線模糊的時代重建人與熊的共存秩序？</p>
+        </div>
+    </div>
+
+    <div class="page-wrap">
+        <div class="section">
+            <aside class="toc">
+                <h4>目錄</h4>
+                <a href="#sec1">一、前言</a>
+                <a href="#sec2">二、社會變遷</a>
+                <a href="#sec3">三、治理爭議</a>
+                <a href="#sec4">四、適應性管理</a>
+                <a href="#sec5">五、結論與展望</a>
+                <a href="#footnotes">參考文獻</a>
+            </aside>
+
+            <div class="card" id="sec1">
+                <div class="section-header">
+                    <h2>一、前言</h2>
+                </div>
+                <p>過去，我們習慣把熊視為「深山中的野生動物」——牠們與人類保持距離，生活在看似截然不同的空間中。然而近年來，日本各地卻頻繁出現熊侵入果園、闖入住宅區甚至造成人員傷亡的新聞。從數據來看，日本的熊害事件近年急遽升溫。2023年曾創下高峰，造成 198 人受傷、6 人死亡；而今年（2025）僅 4 月至 10 月，受害者人數已達 196 人、死亡 12 人，幾乎追平甚至超越 2023 年的全年紀錄。熊害成為了日本全國矚目的治理危機，「熊」甚至成為了今年日本年度漢字。我們開始好奇，熊為何開始頻繁走出山林？人熊關係又為何在短時間內迅速失控？相較於台灣以黑熊保育為核心的治理方向，日本當前最常被報導的處置方式仍是「撲殺」，這是否真能回應問題的根源？又是否存在其他可能的治理路徑？</p>
+                <p>事實上，熊的出現並非源自人們通常直覺認為的「自然環境惡化」或「熊隻瀕危」。相反地，日本長期以來的保育政策成功，使黑熊族群數量顯著回升。而每年11月至次年4月，這些熊隻會進入冬眠，在此前需涉入大量食物，以囤積維持冬眠所需的脂肪；當氣候變遷導致山林主食歉收、結果不佳，黑熊就會擴大活動範圍設法找尋替代食物。人類活動的空間遂成為可能的目的地，故熊隻冬眠前的九至十月，通常成為人熊衝突頻發的季節。</p>
+                <p>然而，人類空間之所以變得「可以被利用」，並非單純的生態因素，而是人類社會自身轉變，所帶來「人退熊進」的結果。人口外移、農村高齡化，到獵人制度的瓦解與觀光行為的改變，都讓過去人類維持的空間邊界逐漸鬆動，人與熊的空間重疊成為新常態。而面對新的人熊關係，「熊出現再移除」的撲殺自難成為長久解方。基於此，本文將從熊害的社會成因出發，梳理現行治理方式所引發的爭議，而後探討並肯定日本正轉向的「適應性管理」，如何創造人熊共存的可能、回應爭議並提供長久解方。最終，本文也將指出其制度實踐上的限制與可改善之處，作為台灣未來思考熊隻治理時的重要參考。</p>
+            </div>
+        </div>
+
+        <div class="section" id="sec2">
+            <div class="section-header">
+                <h2>二、社會變遷：人熊關係的重組</h2>
+            </div>
+            <div class="card">
+                <div class="factor-nav" id="factorNav"></div>
+                <div class="progress-track"><div class="progress-bar" id="factorProgress"></div></div>
+                <div class="flipbook" aria-live="polite">
+                    <div class="page active" data-index="0">
+                        <div class="label">（一）人口老化與外移</div>
+                        <p>日本社會長期面臨少子化、高齡化與人口外移，特別是東北與北海道的農村地區，很多地方甚至逐漸成為「半廢村」。隨著年輕人口離開，農地與果園無人耕作，「里山」（位於深山與城市之間的農村地帶）逐漸荒廢，原先由人類活動形成的天然緩衝帶不再存在。過去由農田、道路、倉庫與林緣形成的人類活動邊界開始鬆動，失去阻隔野生動物的作用，人與熊的空間界線也不再清楚。此外，村落居民多為高齡人口，他們無力維持巡守與驅趕，使村邊從過去的「禁止區」變成熊眼中的「安全通道」。對熊來說，原本牠們需要避開人類的活動區，但現在反而成了自由穿行的廊道，因此隨著人類存在感的下降，牠們也更習慣和頻繁出現在住宅區，甚至走入市區與交通樞紐等高度人類活動的場所。人口變動帶來的不只是農村的衰落，也讓熊一步步從深山走進人類生活圈，成為了「新鄰居」。</p>
+                    </div>
+                    <div class="page" data-index="1">
+                        <div class="label">（二）獵人制度崩解</div>
+                        <p>除了人口外移導致農地荒廢，日本的獵人群體也正面臨嚴重的高齡化問題，現今日本獵友會的獵人平均年齡已經高達60至70歲，而狩獵本身具有高風險、低報酬的特性，年輕世代較少願意加入獵友會，使專業捕熊與驅離技術面臨斷層。加上獵熊必須仰賴經驗豐富和高度團隊默契，每次出動至少需要5位成員，每人至少配備3到4隻獵犬，這樣才能在山林環境中安全執行任務。並非所有人都具備這樣的能力與合作條件，導致獵人們難以找到可靠的隊友，這使在面對熊頻繁出沒時，許多地方因此出現明顯的人力與專業捕熊能力不足。</p>
+                        <p>隨著熟悉山林脈動的獵人逐漸凋零，地方政府也缺乏專業捕獵團隊，在應對熊類入侵時，只能依賴高齡獵人和志工支援，導致反應遲緩且能力受限。當人類社會的制衡力量逐漸瓦解，熊避開人類的行為規範也跟著崩解。過去有效的獵捕與驅趕行動，能讓熊對人類聚落保持恐懼與距離，但當威嚇與懲罰方式失效，熊就缺乏建立「避開人類」的負面經驗。值得注意的是，熊也具有很強的學習能力，牠們一旦在村落邊界取得食物後順利脫身，就會認為這裡是低風險的覓食點，並加以重複造訪。此外，法規與經濟誘因的不足也限制了獵人的行動。根據日本的《狩獵法》規定他們在住宅區周邊的1.5 公里內不得使用槍枝，讓獵人面臨法律風險，同時捕獵補助的金額很低（約 5000 日圓），使得上山處置熊害對獵人而言反而成為了「倒貼」行為。在獵人高齡化、缺乏有效威懾以及法的三重壓力下，獵人制度的崩解為熊進入人類生活區清除了障礙，讓熊更容易進入人類日常生活場域。</p>
+                    </div>
+                    <div class="page" data-index="2">
+                        <div class="label">（三）森林生態影響</div>
+                        <p>影響熊類生態環境轉變的其中一個原因來自於森林棲息地的品質下降和食物來源急速減少。雖然日本的森林覆蓋率維持在約 66% ，但其中有大約 41% 的森林面積已被轉變為以經濟用途為主的單一林相人造針葉林（例如柳杉和檜木），這導致了熊賴以為生的天然闊葉林面積大幅減少。對黑熊而言，闊葉樹結出的橡實與山毛櫸堅果，是秋季累積脂肪、為冬眠做準備的重要熱量來源。但人造針葉林無法提供足夠的堅果，導致熊的棲地的食物多樣性與營養供給嚴重不足，難以滿足生存和冬眠所需的營養需求。</p>
+                        <p>加上，氣候變遷又加劇了這問題，近年因為氣溫變動影響樹木開花與結果週期，部分區域甚至出現「零開花」現象，造成橡子和山毛櫸等森林堅果連續發生大規模歉收，例如 2023年至 2025年的大幅短缺。而當熊無法在入冬前儲存足夠能量，飢餓會變成了迫使牠們改變行為的最直接因素。為了生存，熊開始調整習性，牠們會在森林內啃食人造林樹皮來彌補食物不足，但這也造成林業損失，另一方面，牠們不得不擴大覓食範圍，延後冬眠時間，並開始主動尋找那些更容易獲取、熱量更高的食物來源，包括農作物和田間垃圾，這些行為也逐漸讓牠們走出森林、靠近人類生活圈，最終造成人熊衝突。</p>
+                    </div>
+                    <div class="page" data-index="3">
+                        <div class="label">（四）觀光客餵熊</div>
+                        <p>餵食看似是遊客對野生動物的「友善」，但這是促成人熊衝突的原因之一。熊具備高度學習能力，牠們會在覓食的過程中記住味道和如何獲取食物的方式，只要曾經成功從人類手中取得高熱量食物，就會快速建立「靠近人類就有食物」的連結，也把這視為穩定且風險較低的覓食場所。對牠們來說，相比於在山林裡花費大量時間尋找稀少食物，靠近村落、停車場、露營營地或遊客常出沒的區域無疑是更加省力，也更值得一次次嘗試，因此牠們會與人類越靠越近，使衝突發生的機率一直上升。</p>
+                        <p>為了避免此現象惡化，日本政府近年加強相關法規，依據修訂後的《自然公園法》，在國立與國定公園中特定管制範圍內禁止餵食野生哺乳動物和禁止接近野生動物（包括熊），如果遊客未遵守管理指示，最高可處 30 萬日圓罰金。但這個法規在執行上有限制，由於餵食行為往往在短時間內發生，所以取證不太容易，另外這個罸款條例只適合在特定場域，對於特定場域以外的區域雖受《北海道生物多樣性保全條例》規範，但對違規者採取行為只是制止或公布姓名為主，沒有實質懲罰，讓約束效果有限。</p>
+                        <p>因此，誤餵行為成為滋生問題熊的起點，一旦熊習慣在人的生活圈覓食，便會逐漸失去對人類的戒心，而這類學習行為甚至透過母子傳授延續到下一代，使人熊衝突從偶發事件走向長期化。</p>
+                    </div>
+                    <div class="page" data-index="4">
+                        <div class="label">小結：能動性</div>
+                        <p>綜合以上四個面向可以看出，日本社會與環境的變化，使人與熊原本清晰的界線逐漸消失，人口減少與農地荒廢，會讓熊更容易靠近人類聚落；獵人制度崩解，使牠們不再將人類視為威脅；森林食物短缺迫使牠們離開山林覓食；而觀光餵食與垃圾暴露更進一步強化「靠近人類有好處」的學習效果。此外，熊並非僅受環境逼迫的被動侵入者，牠們會以強烈的學習能力調整行為，展現出面對環境變遷的能動性（agency），牠們進入了人類生活場域和學會如何利用人類所留下的資源與空間。</p>
+                    </div>
+                </div>
+                <div class="page-nav">
+                    <button class="page-btn" id="prevPage">上一頁</button>
+                    <div class="page-dots" id="pageDots"></div>
+                    <button class="page-btn" id="nextPage">下一頁</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="sec3">
+            <div class="section-header">
+                <h2>三、現行治理模式的爭議</h2>
+            </div>
+            <div class="card">
+                <div class="debate-canvas">
+                    <div class="debate-nav" aria-label="爭議標籤">
+                        <button class="debate-chip active" data-target="issue1">數量管理</button>
+                        <button class="debate-chip" data-target="issue2">捕獵與撲殺正當性</button>
+                        <button class="debate-chip" data-target="issue3">責任分工與治理真空</button>
+                    </div>
+                    <div class="debate-controls">
+                        <span class="debate-hint">點標籤可單一聚焦，或展開全部快速瀏覽。</span>
+                        <button class="debate-ctrl-btn" id="debateToggle">展開全部</button>
+                    </div>
+                    <div class="debate-progress" aria-hidden="true"><div class="debate-progress-bar" id="debateProgress"></div></div>
+                    <div class="debate-grid">
+                        <div class="debate-card active" id="issue1">
+                            <div class="debate-head">
+                                <div>
+                                    <h3>（一）數量管理計畫的困境與有效性爭議</h3>
+                                    <div class="debate-meta">焦點：吸引力陷阱與行為學習，非「熊太多」。</div>
+                                </div>
+                                <div class="debate-tags">
+                                    <span class="debate-tag">吸引力陷阱</span>
+                                    <span class="debate-tag">行為文化</span>
+                                    <span class="debate-tag">獵人斷層</span>
+                                </div>
+                            </div>
+                            <div class="debate-body">
+                                <p>隨著日本自2023年始熊害事件的迅速激增，「是否以減少熊的總數作為治理主軸」自然成為最核心、也最具爭議的管理議題。然而，現行的數量管理邏輯存在多重侷限。</p>
+                                <p><strong>首先，衝突並非源自整體族群過多，而是集中於城市邊緣的「吸引力陷阱（ attractive sinks）」。</strong>Sato（2017）指出，熊害事件的頻繁發生主要是基於城市周邊因為垃圾、農作物與破碎化綠帶，而形成吸引棕熊與黑熊的「演化陷阱」，導致少數學會利用人類資源的個體重複造訪人類生活圈，並不是所有熊都會闖入人類生活圈、與人類發生衝突。因此，單純透過捕殺方式企圖針對熊進行數量管理，並無法真正有效減少衝突事件。</p>
+                                <p>從另一個角度來看，<strong>若城市邊界仍具吸引力，被捕殺的熊很快會由新個體遞補，而衝突只會暫時下降</strong>（Sato 2017；Naughton-Treves 2005）。今年日本熊害也展現相同模式，雖然從4到10 月便累計超過 2 萬件熊出沒事件，但大多集中在生活圈邊界，顯示衝突具有高度區域性，而非族群普遍失控。</p>
+                                <p>從歷史脈絡來看，日本 1990 年後的保育政策確實使熊族群恢復，但〈Social Background〉指出，政策轉向後的獵捕限制，也導致城市周邊的熊更容易「定居」在人為干擾低、不被驅離的森林綠帶中，使都市居民開始頻繁遭遇與大型哺乳動物的正面衝突。居民對熊族群的危機感與實際生態評估之間因此產生落差：都市居民往往認為此現象的主因是「熊太多」，但研究者認為真正問題是「邊界吸引物未被移除、問題個體的代際學習」。</p>
+                                <p>此外，<strong>數量管理同時忽略了熊的「行為面」與「社會性」特質</strong>。相關研究同時指出，<strong>「棕熊斷代」與避人習性的失傳正加劇衝突的循環</strong>。在北海道相關研究中，提到熊避開人類的行為其實是一種「文化學習」，高度依賴母熊在幼年期的教導。然而，當老一代棕熊因捕殺壓力或管理政策而大量減少時，幼熊便失去學習「避人」的機會。這些缺乏經驗的幼熊不但更容易在食物短缺時走向城市邊界，也更容易學會將人類環境視為穩定的食物來源。而當熊不再害怕人，甚至把城鄉界線視為主要活動空間的一部分，只會加劇人與熊之間的衝突，導致後續更難以進行管理。</p>
+                                <p>Sato（2017）則指出，習慣人類食物來源的熊會將行為傳遞給下一代，這意味著問題並非由「總體族群量」決定，而是由少數熟悉人類環境的母熊或次成體所帶動的。2025 年多起攻擊事件也顯示，黑熊已出現「城市熊」，甚至開始出現「記住人類味道」、「不再把人類視為威脅」的情形，這些皆屬於人類行為介入導致的習慣化，而非族群自然擴張的結果。換而言之，<strong>問題的根本在於熊的行為，非在於數量</strong>，因此單純減少數量未必能消除熊害事件的發生<strong>。</strong></p>
+                                <p>最後，從治理的角度切入，<strong>日本過去依賴獵人執行捕殺，但獵人數量急速崩解</strong>（1978：兩萬人、2022： 5361 人），導致數量管理在實務上也難以落實。即使政府要求提高捕殺量，也缺乏足夠且具技術能力的獵人能執行這龐大的工作量。更重要的是，城市 1.5 公里內禁止開槍的法規使得獵人無法在衝突熱區進行必要的選擇性移除，形成「<strong>政策上強調捕殺、實務上無法捕殺</strong>」的矛盾。</p>
+                                <p>總結來說，數量管理計畫所引發的爭議，實質上反映了生態機制、社會期待與治理現實等多方張力拉扯下的窘境。倘若要有效減少衝突，核心並非「減少熊」，而是識別並管理「問題熊」、改善邊界環境、減少習慣化來源、建立新的治理制度。這使得現行的數量管理不但效果有限，反而成為熊害治理中最具爭議、也需要被重新思考的政策方向。</p>
+                            </div>
+                        </div>
+
+                        <div class="debate-card" id="issue2">
+                            <div class="debate-head">
+                                <div>
+                                    <h3>（二） 捕獵與撲殺的正當性爭議</h3>
+                                    <div class="debate-meta">對立：居民安全 vs. 動物倫理；政策擴權引爆社會張力。</div>
+                                </div>
+                                <div class="debate-tags">
+                                    <span class="debate-tag">風險感受</span>
+                                    <span class="debate-tag">倫理拉鋸</span>
+                                    <span class="debate-tag">政策擴權</span>
+                                </div>
+                            </div>
+                            <div class="debate-body">
+                                <p>日本近年的熊害問題之所以存在高度爭議，並非單純針對「如何管理野生動物」的技術性爭論，而是不同社會群體對風險的感受、價值觀與生態理解出現了深刻分歧。近期新聞中提到，NHK做的相關民調指出，超過七成的民眾認為政府應該透過更強硬的措施解決目前的熊害問題。對多數村民與地方居民而言，<strong>熊害無疑會直接對到其人生與財產安全帶來極大的威脅</strong>。隨著近期熊害事件劇增，加上媒體報導的渲染下，居民也不乏在受訪過程中直言「每天都活在熊可能會出現的恐懼中」，捕殺也因此成為他們認知當中的必要手段。然而，居民同時面臨另一種壓力，在社群媒體上被強加「虐待動物」的道德標籤，使得他們在面<strong>對真實威脅的同時，還要承擔道德評價的負擔</strong>。</p>
+                                <p>與此形成鮮明對比的是都市居民與動物保護團體，由於這些群體多數位於非衝突地帶，實際遭遇野生熊的機率相對低，因此更<strong>傾向從動物權利、保育倫理與生態正義角度</strong>理解熊害議題。國際動物保護組織 PETA 便多次公開反對日本政府的撲殺政策，主張「殺熊不是解決衝突的方法」，並強調衝突的根源在於棲地破碎化、再生能源設施侵入山林、覓食地消失等人為因素。他們提出替代方案：安裝電子圍籬、恢復里山緩衝區、種植山毛櫸與橡樹改善深山棲地等，主張讓熊被自然吸引回到山林，而非透過撲殺方式來壓制族群數量。</p>
+                                <p>除了當地居民與動保團體的分歧外，生態學者與保育專家對撲殺的立場相對複雜。他們既關注人類安全，也關心生態系統的穩定性，因而<strong>支持「選擇性移除」或「問題個體」的捕殺</strong>，而非大量撲滅。這種科學視角與居民所期待的「立即排除風險」的理解不同，也與動保團體主張的「全面非致命」形成張力，充分顯示<strong>同一事件在不同群體之間的理解、風險想像和道德直覺都可能存在極大的差異。</strong></p>
+                                <p>如今，面民生命安全損失與獵人制度崩解的壓力下，日本政府開始以制度化方式擴大「合法開槍」。例如「緊急持槍狩獵制度」自 2025 年 9 月正式上路，放寬市區開槍限制，以便在緊急情況快速捕殺， 11 月起警察廳則修法允許防暴警察在居民區使用步槍獵殺構成威脅的熊。此舉雖然獲部分居民強烈支持（如秋田縣居民呼籲「要讓熊重新記得人類是可怕的」），卻也變項<strong>加劇社會當中的矛盾衝突</strong>。近期新聞提到在秋田獵友會射殺熊隻後，動保團體便隨即在社群平台批評此行為，並呼籲秋田居民發起「不賣運動」抵制當地農產品來表達抗議。動保人士不認同當地政府獵殺、派遣自衛隊防熊等做法，而是提出透過「必開熊出沒季節耕作、散步」和「遠距上課」等應對措施。</p>
+                                <p>隨著不同群體因為風險認知、倫理立場、空間經驗與生活脈絡的分歧，<strong>撲殺行為本身自然在不同群體的價值觀中存在截然不同的意涵。</strong>對部分生態學者而言，有限度的捕獵是一種「維持生態系統整體平衡」的必要管理工具，透過移除干擾性高的個體，避免過度繁衍，破壞植被、影響其他物種等生態問題發生。然而對許多居民而言，捕殺更像是基於危險逼近所引發的防衛、反制行爲，因此當熊害事件頻頻威脅到生命安全時，居民多半將捕殺視為必要的措施。反觀動保團體與部分都市公眾，將撲殺視為人類將熊「敵化」和人類中心主義霸權的一種體現，而非真正面對生態破壞的有效途徑。</p>
+                                <p>由此可知，捕獵與撲殺的正當性爭議並非單純的科學或技術上的問題，而是一場各方拉鋸的價值衝突。撲殺究竟代表「風險移除」、「生態破壞」還是「不得不的治理手段」，往往取決於站在哪一個位置、角度去切入這次的事件。由此可知，捕獵不是完全中性的技術，而是一個深植於不同價值、情緒與倫理框架中的行動，其正當性難以在單一社會語境下被完全定義。</p>
+                            </div>
+                        </div>
+
+                        <div class="debate-card" id="issue3">
+                            <div class="debate-head">
+                                <div>
+                                    <h3>（三）誰應負責？：治理能力與角色模糊</h3>
+                                    <div class="debate-meta">議題：民間能力下滑、制度真空、責任滑移。</div>
+                                </div>
+                                <div class="debate-tags">
+                                    <span class="debate-tag">制度真空</span>
+                                    <span class="debate-tag">角色錯位</span>
+                                    <span class="debate-tag">治理量能</span>
+                                </div>
+                            </div>
+                            <div class="debate-body">
+                                <p>相較於熊本身造成的威脅，日本於<strong>治理體系中的角色模糊與制度真空（institutional voids）</strong>才是真正的問題根源。過去日本各地長期依賴「民間獵友會」作為人熊衝突的第一線處理者，無論是驅離靠近村落的熊、設置陷阱，或在緊急狀況中執行捕殺，地方獵人一直被視為默默支撐野生動物治理的核心。然而，這套<strong>以民間獵人為主體的治理模式正快速走向崩解</strong>，全國持證獵人在過去五十年減少到僅剩當初的四分之一，其中更有七成以上年過六十。新聞中指出，北海道獵友會會長堀江篤直言，<strong>獵友會不願再承擔捕殺棕熊的任務</strong>，原因包括任務高風險、傷亡頻傳、補助不足，以及長期以來獵人必須「倒貼經費」執行政府要求。此外，他更坦言不想再因為制度的不健全而失去任何一位會員。種種現象顯示當前日本的人熊治理正在面臨「民間能力凋零」與「制度支撐不足」的雙重危機。</p>
+                                <p>正因為獵人制度的逐漸瓦解，過去倚賴民間力量的治理模式已無法持續，原本應由政府承接的責任卻仍未被清楚界定。警察與自衛隊雖握有公權力，但缺乏野生動物處理訓練，加上「緊急持槍狩獵制度」仍存有高度不確定性，使得基層警員普遍擔心誤傷居民、觸犯槍械規範，在任務執行過程中必須背負巨大的壓力。這些顧慮也並非無中生有，過去便有受政府委託捕熊的獵人因「朝可能擊中建築物的方向開槍」而遭吊銷槍證的判例，使得警方與獵人都變得更加謹慎，甚至不敢於現場使用武力。由此當面對熊進入市區的緊急情時，各部門不僅無法有效配合、合作，反而出現「誰來開槍？」的反覆推責。地方政府表面上支持由獵友會與警方合作，但實務上卻缺乏明確作業流程與責任分工，使得任何決策都需逐案判斷，而無法迅速反應。隨著熊不斷靠近農地、闖入市區、進入學校周邊等不同風險場景下，究竟應由獵人、警方、自衛隊還是地方公所負責？陷阱由誰設置？現場誰負最後的法責？<strong>在制度尚未明確化的狀態下，所有行動者都傾向採取更保守的態度，進而變向形成一種治理上的制度真空。</strong></p>
+                                <p>在獵人逐漸退出、政府又難以承擔完整責任的情況下，<strong>「政府獵人」成為新的公共討論議題。</strong>支持者認為專職的野生動物治理人員能補足高齡獵人凋零的缺口，並建立更穩定、制度化的治理機制。然而，也有反對者擔心政府獵人的制度化意味著「官方常態化撲殺」，可能進一步削弱生態保育目標，並造成「制度化殺熊」的正當性被無限延伸。這場辯論突顯日本目前在野生動物治理上的一大矛盾：人力不足、制度未定、責任模糊，而近期衝突頻繁發生又使得社會極度焦慮地要求「立即有效」的解方。</p>
+                                <p>在治理體系尚未妥善建立的情況下，居民也被迫承擔某些防範責任。「移除吸引物」（如果樹、垃圾、廚餘、堆肥）或許是能從根本且有效減緩熊隻頻繁入的一種防範原則，但在實務上卻很容易將這項原則過於簡化為「由居民自行負起責任」。許多地方政府要求住戶必須調整垃圾管理方式、避免種植會吸引熊的果樹，甚至在特定季節減少外出或更改日常動線。顯然地，這些要求忽略了現實限制，多數居民缺乏長期維持上述措施的資源與專業知識，也不可能單憑個人生活習慣改變，取代本應由整個治理體系負責的熊隻防範工作。當政府未能提供充足的制度支持，卻<strong>要求居民以降低生活品質、限制行動自由或承擔額外成本來彌補治理缺口</strong>，無疑體現出當前在治理上的嚴重失衡。</p>
+                                <p>從治理尺度的角度來看，這種責任模糊並非單一制度設計的失衡，而是反映一種治理層級錯配的結果。人熊衝突表面上發生於地方與社區，但其背後涉及的是獵人制度崩解、警政資源使用、槍械法規等，皆非地方政府或社區層級所能單獨處理的議題。當風險被視為地方事件處理，卻需要國家層級的資源與權限時，治理責任自然只能在不同層級之間來回游移，最終無人能完整承擔。</p>
+                                <p>有鑑於此，日本當前最大的問題並非單純的熊隻增多或熊不再怕人，而是在人熊衝突常態化的情況下，治理體系未能建立清楚的責任分工與充分的治理能力。當民間缺乏資源、政府缺乏明確制度、居民缺乏專業時，人熊衝突便成為一場無人能全然負責的公共危機。在制度真空持續存在的情況下，即便新增法律、放寬槍械規範或動員警方，依舊難以有效減緩衝突，只能在事件發生後疲於補救。綜合上述三項爭議可以發現，日本的人熊衝突並非單一政策的失靈，而是整體治理邏輯與現實環境之間出現的結構性落差。數量管理無法回應行為層次的衝突，撲殺在不同社會群體間缺乏共識，而治理責任又分散於地方、中央與民間之間，因而出現「看似人人有責，實則無人有能」的窘境。當風險高度不確定、行動者多元、衝突樣態快速變動時，傳統以「事後排除」或「單一權責」為核心的治理模式，早已難以因應現今的危機。在此脈絡下，日本針對熊的治理模式逐漸開始從「如何處置熊」的技術問題，轉向「如何持續調整人熊關係」的治理問題，並逐漸引入以學習、回饋與彈性調整為核心的適應性管理作為新的治理框架。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="sec4">
+            <div class="section-header">
+                <h2>四、治理轉向：適應性管理</h2>
+                <p>從空間劃界、行為引導到生態監測，適應性管理構成完整的治理路徑。</p>
+            </div>
+            <div class="card">
+                <div class="adaptive-intro">
+                    <p>當撲殺與數量控制接連失效，而「保育／人身安全」的爭辯又不斷重複，加上治理責任長期模糊、制度無法迅速回應，日本的熊隻治理模式正經歷典範轉移。管理核心已轉向已「適應性管理」作為長期框架，試圖超越「人／熊對立」或「保護／排除」的二元視角，建立一套兼顧生態保護、動物福祉與地方生計的動態共存機制。</p>
+                    <p>適應性管理是由C.S. Holling 和 Carl Walters提出的一種自然資源的治理哲學，起自對管理中所面對之複雜自然環境與高度不確定的意識，發現單純「建構模型」無法有效回應。<sup>1</sup>轉而強調保護政策應是「持續學習」的過程，透過評估問題、設計方案、實施行動、評估成效到調整策略的循環疊代，隨環境與行動者的反應不斷調整。<sup>2</sup>日本將適應性管理的實施分作兩大面向進行，其一是科學為基礎、自上而下的族群管理，二是社區為基礎、自下而上的損害管理。<sup>3</sup>前者由專家系統制定宏觀策略、設定物種存續底線與生態監測；後者則強調讓在地居民參與治理過程，並將其經驗與需求納入決策考量。在此脈絡下，人熊衝突的治理不再是單純的「消滅害獸」，而試圖在熊隻族群的保育需求與人類生計的風險緩解之間，尋找可持續的平衡點。</p>
+                    <p>具體而言，日本的熊隻治理落實可從三大面向理解：首先是透過「分區管理」將人與自然的邊界空間化；其次是承認熊的能動性，透過「行為調控」與熊進行非語言的邊界談判；最後則是引入「科技監測」，將生態環境納入預警系統。而這些治理行動的有效性，也都有賴地方社區的參與。</p>
+                </div>
+
+                <div class="management-accordion">
+                    <div class="management-item active">
+                        <div class="management-header">
+                            <h3>（一）分區管理：以空間界定衝突</h3>
+                            <span class="management-toggle">+</span>
+                        </div>
+                        <div class="management-body">
+                            <p>分區管理的核心目的，是透過標準化的空間治理，為「哪些熊需要被處置、如何處置」建立一套基準。透過劃分「保育區」、「排除熊區」與兩者之間的「緩衝區」，讓不同的管理行動（保護、驅趕、捕殺）有了制度化的依據。<br>
+                <strong>保育區</strong>的劃定以維持棕熊族群的生態需求為標。區域中允許熊隻自由生存、承認熊的主體性，人類活動應降至最低；排除熊區則包括農地、市區與聚落等，對熊採取「零容忍」態度，重點在於阻絕熊隻進入與快速排除，以保障居民生命財產安全。同時，鑑於「文明」與「野生」無法截然二分，兩者交界的森林邊緣被設為緩衝帶。此處為行為調控策略最常實施的區域，目的在透過人為干預，讓還衝帶成為熊隻「不願進入」的空間，防止其滲透進人類生活圈。在實務上，空間邊界本身就是適應性管理的一部分：區域劃分會隨季節、熊的移動模式、食物年景與地方需求而不斷變動。<br>
+                地理劃分的過程中，熊的身分與風險也由此建構。保育區最為熊的家園，此處的熊被承認為「自然地」出現在此的野生生物；緩衝區的他們則是「越界者」，空間成為透過制約談判的場域；在排除區的熊隻，則成為入侵者，是應被排除的風險。</p>
+
+                            <table>
+                        <thead>
+                            <tr><th>區域</th><th>定義</th><th>主要管理行動</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>保育區</td><td>維持族群與生態需求</td><td>允許生存、限制人類活動、維持棲地品質</td></tr>
+                            <tr><td>緩衝區</td><td>文明與野生的邊界</td><td>厭惡性制約、行為調控，讓熊「不想」跨越</td></tr>
+                            <tr><td>排除熊區</td><td>農地、市區、聚落</td><td>零容忍，快速阻絕與排除入侵個體</td></tr>
+                        </tbody>
+                    </table>
+                        </div>
+                    </div>
+
+                    <div class="management-item">
+                        <div class="management-header">
+                            <h3>（二） 熊隻行為調控：與熊談判邊界</h3>
+                            <span class="management-toggle">+</span>
+                        </div>
+                        <div class="management-body">
+                            <p>熊具有能動性，不會自動遵守由人類劃定的邊界，因此，區域劃分的落實，有賴緩衝區的熊隻行為引導。透過厭惡性制約、物理隔絕和地景管理，能讓熊習得並理解「哪些地方是危險、不該靠近的」，建立人熊之間相對可預測的互動秩序。</p>
+                    <p><strong>(1) 非致死性管理 ：厭惡性制約</strong><br>
+                    根據日本的有害性分級，那些尚未造成農損或人身實害，但「不懼怕、不躲避人類」的個體，就會被定義為「滋擾熊」。雖未達到應被物理排除的程度，但仍具有高度的衝突風險。厭惡性制便是處理此風險的行為根源：部分熊隻「習慣靠近人類」。相較於獵捕將熊視為本質上危險、需被排除的對象，動物於此被視為可以被教導、與人類共學邊界的互動者。儘管其中不免帶有人為強制性、人對熊的上下關係，但已正式熊的行為實為長期互動的產物，邊界的落實方式從「一次性處罰」轉向「持續性互動調整」。</p>
+                    <p>行為調控依賴熊的生物學研究，主要以負面制約讓失去警戒心的熊將人類活動區域與「不愉快」連結，將人居空間認知為不安、危險和無利可圖的之地，從此自主迴避。不只可長期減少衝突，也能避免進入撲殺的最終途徑，兼顧人身安全與動物福祉。</p>
+                    <p><em>學習放獸</em><br>
+                    負面制約過程必須「讓熊感到最大限度的不愉快」但又「不致死」，輕井澤熊隻管理組織Picchio的「<strong>學習放獸</strong>」便是成功的典範。緩衝區設立的誘捕籠，能主動吸引誤入此處的熊隻，光被捕獲所造成的驚嚇就足以讓熊產生反感。而在將其將放歸回保育區前，人類也會對熊隻施加強烈威嚇，以加強負面印象，讓熊隻學會認識「人類是可怕的」。<br>
+                    非致死威懾物包括人或熊犬的大聲吠叫、以及橡膠彈等。橡膠彈首要瞄準熊隻臀部，以造成疼痛威攝，同時避免致命傷害；專業熊犬 則透過巨大的吠叫聲和追趕，將熊從人類居住區驅趕至森林深處。除了現行方法，其他研究曾檢視不同非致死性威社物對肉食動物的驅趕與制約的效果。結果顯示，朝向熊的眼睛噴射的辣椒噴霧，也是有效的化學趨避劑，熊隻於實驗中幾乎100%被驅趕；而哨音等聲音刺激的存在，反而可能分散熊的注意力，降低制約成功的可能性。不過，結果是否能譜同應用於日本，仍有賴熊隻生物性差異、環境背景等影響因素了解，但仍不失為參考方向。<br>
+                    最後，放歸的熊隻會被配戴追蹤器，管理員將關注牠們是否仍在人類區域附近移動，並決定是否進行額外驅趕，以強化制約。</p>
+                    <p><strong>(2) 阻斷誘因：物理屏障與吸引物管理</strong><br>
+                    行為調控無法在真空中獨立運作。若曾受制約的熊隻返回原衝突地點後，依舊能輕易獲取食物，制約效果將迅速瓦解。因此，除了針對熊隻本身的教育，還必須同步進行環境的構性改變，移除環境中的拉力，讓熊隻徹底斷絕「靠近人類＝獲得食物」的聯想。</p>
+                    <p><strong>抗熊垃圾容器</strong>：雖然熊進入人類空間不只是因為飢餓，但覓食依舊是熊隻進入的主因。北海道、輕井澤等處，已開始在公共垃圾收集點導入熊隻無法開啟的「抗熊垃圾容器」。垃圾箱的重量達1頓，以2毫米後的鋼材製成，即使綜熊也難以破壞。當熊隻屢次嘗試仍無法獲取食物，將能學會放棄、不再靠近此處。</p>
+                    <p><strong>電圍籬</strong>：電圍籬已被證實能有效阻止棕熊侵入農地，地方政府也開始推廣設立，尤其是在農作物種植區。電圍籬即通電柵欄，能能給予令熊隻不適，但並不致死的電脈，讓熊隻建立靠近此處的負面聯想，以此學會規避。<br>
+                    這些技術物的設置，通常有賴政府或組織採購、決定放置地點，等同將「避免吸引熊」吸納進政府責任中，而不僅要求個別居民承擔風險。</p>
+                    <p><strong>(3). 地景管理：消除隱蔽通道與棲地維護</strong><br>
+                    除了控制人類聚落內的誘因，環境本身的空間型態，以及棲地品質，也是左右熊隻移動意願的關鍵。地景管理上，除了於人類空間中能阻斷熊隻的入侵路徑，也需維護熊隻原棲地，以減少促使其向外移動的生態推力。</p>
+                    <p><strong>熊隻入侵路線管理</strong>：隨著人口外移，人類退場後的廢棄農地、無人管理的林地，逐漸串聯成熊隻能自在移動而不為人發現的活動走廊。<sup>4</sup>這些通常處於農村、缺乏人為干擾的路徑，往往成為熊隻從森林移動到市區的中繼。因此，管理重點在於創造開闊的視野，讓熊隻缺乏遮蔽而容易被人發現，或讓厭惡開闊地帶的熊感到不安，<sup>5</sup>而不敢貿然穿越。<br>
+                    相較實體建設物理性傷害或阻擋，地景的管理旨在達成隱性圍堵的效果。尤其在熊隻出現的農村地區，透過清除灌木、整理林緣、管理河岸林地等方式進行環境修整，能有效防止熊隻進一步進入市區，造成更大的不安。</p>
+                    <p><strong>熊隻棲地管理</strong><br>
+                    防堵之外，若核心棲息地的環境惡化，飢餓的熊隻仍會冒險闖入人類社會。因此，在熊隻的主要棲息地，即區域管理中劃分出的「保育區」，應積極透過自然公園法、鳥獸保護法、保護林制度等既有的法規工具，維持地區自然生態、限制不當開發<sup>6</sup>。若能確保深山環境足以支撐熊群生存，就能大幅降低熊隻因天然食物匱乏而被迫溢出到人類區域的機率。</p>
+                        </div>
+                    </div>
+
+                    <div class="management-item">
+                        <div class="management-header">
+                            <h3>（三） 監控生態：以數據預測取代被動應對</h3>
+                            <span class="management-toggle">+</span>
+                        </div>
+                        <div class="management-body">
+                            <p>人熊衝突並非隨機發生，而是受廣泛的生態網絡影響。前瞻性的熊隻動態預測，正是把視野重新拉回到更完整的生態系統，關注那些能左右熊隻行動的非人行動者。透過數據監測，管理策略將能從衝突後被動反應，轉向基於科學的是先預警，同時作為區域劃分、保育數量設定的依據。</p>
+                    <p><strong>天然食物的豐凶監測</strong><br>
+                    山毛櫸與橡實等主要食物的年際變動，是決定人熊距離的關鍵。在許多地區，天然食物的歉收已知與熊隻出高度相關：當森林未能提供足夠能量來源時，熊便被「推」向農村與市區尋找替代資源。因此，日本開始將「堅果產量監測」納入預警機制，作為判斷是否可能出現大量滋擾事件的前兆。惟須注意生態訊號並非普同一致，部分研究區域並未呈現相同的強烈關聯，需結合地方研究、社區參與逐步校準，避免頻繁誤報，讓公眾失去信任、失去警覺。</p>
+                    <p><strong>綜合模型</strong><br>
+                    除了食物供給外，時間（季節變化）、人類土地利用、人口分布、氣象條件等，也都能成為預測模型的變項，建構出多元變項的「熊出沒預警模型」。地方政府能以此提前發布警示，提高居民的警覺，並調度防除資源。</p>
+                        </div>
+                    </div>
+
+                    <div class="management-item">
+                        <div class="management-header">
+                            <h3>（四） 社區參與治理與政府政策</h3>
+                            <span class="management-toggle">+</span>
+                        </div>
+                        <div class="management-body">
+                            <p>治理措施走向，「分區管理—行為調控—科技監測」的多層次架構後，實務推行仍取決於地方社群的能量。在獵人高齡化與人力不足的條件下，單靠專業捕獲者已無法支撐整體風險管理，如何透過社區參與與政府政策的結合，重構人熊關係，成為新一輪治理的核心。從自主巡邏、地區管理、教育三個面向，結合中央政府的熊害對策，討論社區參與治理的具體樣貌。</p>
+
+                    <p><strong>(1) 自主巡邏：從「專業獵人」到「多元行為者」的安全共管</strong><br>
+                    在熊隻已經進入村落、靠近住宅或校園等生活圈的地區，地方政府開始引入多樣化的巡邏模式。東京都西多摩地區實施的「クマ緊急パトロール」中，由東京都狩獵協會的成員三人一組，攜槍在生活圈內巡邏，一方面通過爆竹等手法驅逐熊，另一方面在熊長時間逗留時，市町村可根據情況決定是否啟動「緊急獵捕」。這種做法表明，地方政府並非單純「委託獵人」，更是在與獵友會構成一種風險管理體系。</p>
+                    <p>宮城縣的「クマ出没地域等緊急パトロール」則由警備公司受託執行，組成七組兩人一車的巡邏隊，重點巡邏過去曾有目擊紀錄的路線與中小學周邊，必要時透過車載擴音器向居民廣播提醒。秋田市則由市政府各部門職員輪流出勤，平日每天動員八人、分成四組，在出沒通報集中的市區巡邏，遇到正在戶外活動的居民會直接勸導注意，若發現熊的痕跡則立刻通報對策本部，以利迅速捕捉或驅除。</p>
+                    <p>這些案例顯示，熊害治理已從「獵人 vs 熊」的二元對立，轉向由獵友會、警備公司、市職員甚至 PTA 共同參與的「多行為者治理」。同時，環境省的《クマ類の出没対応マニュアル》要求各自治體事先構築跨部門聯絡體系、明確分工與訓練程序，並在緊急時由地方政府統籌出動相關人員，形成從中央指導—地方執行—社區參與的階層式安全網。</p>
+
+                    <p><strong>(2) 社區參與：地區管理落實的條件</strong><br>
+                    其次，在「地區管理」層次，社區日常生活方式本身就成為重要的治理工具。</p>
+                    <p>宮城縣加美町從居民的垃圾丟棄習慣著手治理，透過嚴格規定「只能在收集日清晨 6–8 點丟垃圾」、要求生廚餘充分瀝乾並緊密封袋、禁止在屋外放置寵物飼料與腐爛農作物等，試圖消除能夠吸引熊靠近的誘引物。北海道札幌市的宣導亦強調「不要把垃圾放在屋外」「垃圾僅能在收集日早上拿出」，同時提醒居民清除家庭菜園中廢棄蔬果、避免設置戶外堆肥桶，並鼓勵安裝電圍欄與及早採收作物，以從根本上減少熊前來覓食的誘因。</p>
+                    <p>這些地方實踐正呼應了環境省手冊中所強調的：熊進入生活圈的背後往往有「誘引物」與「環境管理」的問題，因而需要透過果樹與垃圾管理、電圍欄設置、緩衝帶整備等手段來抑制出沒，同時由當地居民作為主體，持續、集體地維持這些防除措施；自治體提供制度與資源，負責提升意識並提供補助金、技術支援。換言之，「地區管理」並非單一措施，而是居民日常行為規則與公共基礎設施相結合的人為空間治理。</p>
+
+                    <p><strong>(3) 教育與風險溝通：把熊害納入「學校—家庭—社區」的學習迴路</strong><br>
+                    在教育面向，北海道教育委員會的《學校における危機管理の手引》追錄中，可以看到政府如何將熊害視為一種需透過「學習與溝通」來治理的風險。當學校附近出現熊出沒資訊時，校長需與市町村教育委員會及警察協調，統一掌握資訊並傳達給學生與家長，必要時調整上學方式（由家長接送）、實施線上授課或暫停戶外活動；上下學時間若發現熊可能經過通學路，學校還必須與市町村、警方、PTA 合作，由教職員在確保自身安全的前提下巡視路線，並在路上避難誘導學生。未來的預防策略方面，文件建議利用北海道環境生活部製作的教材，在班級活動或綜合學習時間中對學生進行安全指導與熊害知識教育，同時透過班級通訊等方式，促使家長在家庭內進一步提醒與討論人熊共存的方式。</p>
+                    <p>文部科學省與環境省在 2025 年共同發出的事務連絡也要求，全國各級學校根據《クマ類の出没対応マニュアル》修訂自身的危機管理手冊，並依各地實情檢討通學路調整、聯絡體系與日常生活中的注意事項，這些都將熊害治理納入「學校—家庭—社區」的連續學習框架之中。由此可見，教育不僅是傳遞知識，更是一種讓兒童與家長調整行為、學會「正確地害怕熊」的治理技術。</p>
+
+                    <p><strong>(4) 中央政府政策：支撐在地實踐的多層級治理框架</strong><br>
+                    上述社區層級的巡邏、垃圾管理與教育實踐，並非各自為政，而是嵌入中央政府近年強化的熊害對策之中。2025 年關係閣僚會議通過的《クマ被害対策パッケージ》指出，在熊的分布與個體數持續增加、人身被害與死亡人數比歷年高的情況下，國家將分階段推動緊急應對、短期與中期措施，以「在人類生活圈確實、迅速排除出沒個體」並透過周邊地區的捕獲強化實現個體數管理與「人熊すみ分け」。</p>
+                    <p>具體而言，政府一方面透過鳥獸保護管理法修法與「緊急銃猟制度」，讓市町村能在必要時迅速決定緊急射擊，同時支援自治體製作緊急獵捕手冊與出沒應對訓練；另一方面，則以指定管理鳥獸對策事業交付金與特別交付稅，補助地方導入電圍欄、緩衝帶整備、熊用陷阱箱、熊噴霧與防護裝備，以及 ICT、無人機監測等資源。總務省並鼓勵自治體任用具狩獵資格的人員為常勤職員，並以特殊勤務手當與交付稅支持其人件費支出，試圖在獵人崩解的情況下重建公部門的捕獲能力。</p>
+                    <p>同時，警察廳與防衛省也被納入熊害治理網絡：前者透過規則修訂，使警察官得以在特定情況下使用步槍直接駆除侵入人里之熊，並派遣支援部隊與獵友會共同訓練；後者則在秋田縣協助運搬陷阱箱、掩埋熊屍體與進行無人機空拍搜尋，象徵熊害已上升為需要國家安全資源介入的社會風險。</p>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- card -->
+        </div> <!-- section -->
+
+        <div class="section" id="sec5">
+            <div class="section-header">
+                <h2>五、結論</h2>
+            </div>
+            <div class="card">
+                <p>適應性管理之所以成為近年日本人熊治理上的關鍵轉向，並非因其提供了一套「完美解方」，而在於它正面回應既有治理模式的多重失靈與爭議。首先，面對數量管理存在的弊端，適應性管理不再將熊簡化為可被計算的族群總量，而是將其視為在具體空間中活動的「問題個體」。透過分區管理、行為調控、誘因移除與生態監測等手段，治理的介入點被前移至衝突發生之前，嘗試調整人熊互動的條件，而非僅在衝突爆發後事後處置。</p>
+                <p>再者，針對撲殺引發的正當性爭議和社群分裂，適應性管理並未預設單一倫理立場，而是透過分區管理與分級回應機制，將「是否致死」轉化為可依風險、情境與證據，進行動態調整的治理選項，避免「撲殺」一再落入「是否正當、是否必要」的道德辯論中。最後，在過去治理角色模糊的制度困境中，適應性管理嘗試透過多層級治理架構，重新配置中央、地方與社區的角色與資源，使治理責任不再游移於不同層級之間，而是被嵌入具體的制度流程與行動網絡之中。</p>
+                <p>正是在這個意義下，適應性管理的核心精神並不在於「消除衝突」，而是在承認人熊衝突將成為常態的前提下，使治理本身具備學習、修正與回應不確定性的能力。本文因此肯定，適應性管理確實為日本的人熊治理開啟了一條相對可行、也更具反思性的路徑。然而，亦須指出的是，適應性管理作為一套系統性策略，實際上是在日本熊害於今年(2025)明顯惡化後，才被加速推動並制度化，其長期成效仍有待時間與經驗累積驗證。在此脈絡下，即便認同其治理哲學，仍有必要從實作層面指出其中潛藏的結構性限制與風險。</p>
+                <p>本文於此嘗試從實作層面提出幾點批判，在認同其管理哲學之上，進一步釐清現實條件下可能面臨的限制與風險，望能作為未來政策修正與討論的基礎。適應性管理雖然提供了與熊共存的多元治理視角。然而，這套模式中仍存在隱蔽的權力關係，以及不現實的治理量能預設。</p>
+                <p>首先，適應性管理的主導權依舊牢牢掌握在人類手中，「適應」多半指向熊適應人類規範，而較少要求人類對自身生活型態、土地使用與制度安排作出同等幅度的改變。在承認人熊共同構成關係網絡的同時，也必須正視雙方存在能動性與權力的不對等，完全的悅納異己亦難達成。正因如此，人類更應承擔相應的倫理責任：包括保育區是否真正回應熊的生態需求，而非僅將人類不欲使用的空間消極劃撥給熊；非致死行為調控是否在實務上維持足夠的人道標準，避免「為了不殺死而持續威嚇」在長期累積下，反而對熊造成額外的壓力與行為扭曲。這些問題皆仰賴持續的科學研究與倫理反思，才能在風險管理與動物福祉之間維持傷害最小化，避免治理工具本身成為新的支配形式。</p>
+                <p>其次，現行治理模式在落實上，往往預設了一個並不存在的「強韌地方社會」。在現實層面，農村作為熊隻出沒的高風險區，正同時承受人口外移及高齡化的結構性壓力，地方居民無力維持密集的巡察、管理與應變工作。同時，相較於都市，這些地區能動員的行政資源有限、政治能見度與影響力亦相對薄弱，使適應性管理所要求的「持續調整」與「社區參與」，可能反而轉化為對地方的不成比例負擔，被迫承擔非致死治理與動態邊界的繁重實作成本。因此，若不正視城鄉資源落差，適應性管理所描繪的共存理想，將難以在最需要它的地方真正落地。「社區參與」不只關乎地方參與治理實踐，也須同時關注居民的意見是否能被納入政策設計與回饋中。</p>
+                <p>第三，現行政策仍未正面回應獵人制度的崩解問題，而這正是行為調控與分區治理能否運作的關鍵支點。非致死管理高度仰賴具備野生動物知識與現場經驗的行動者，然而警察與自衛隊並不具備相關專業訓練，長期處於制度邊緣、缺乏保障的獵人，又難以在缺乏誘因與信任基礎下成為穩定的合作夥伴。政府對獵人的上對下動員，若未能同步建立合理的報酬、補償與制度化職涯支持，只會進一步削弱治理網絡的可持續性。如何明確法規保障，將獵人的利益與專業轉譯為治理體系中的穩定節點，仍是適應性管理亟待補強的環節。</p>
+                <p>總體而言，雖然台灣與日本在熊隻數量與治理目標上有所差異，但日本所採行的適應性管理中，對台灣的關鍵啟示不在於具體技術的移植，而是對人熊衝突的理解方式轉變。適應性管理隱含了行動者網絡（ANT）與 natureculture 的視角，指出人熊衝突並非熊「入侵」人類社會，而是由氣候變遷、土地使用、農村人口流失、獵人制度崩解與治理規範等多重人類與非人行動者交織所形成的結果。在此關係網絡中，熊的移動路徑與行為策略，是在既有環境條件與制度安排下被牽引、被迫調整與重新分配的產物。</p>
+                <p>因此，「共存」不再意味著單向的容忍或道德訴求，而是要求人類承認自身制度、行為與資源配置，早已深度參與並形塑了熊的行為條件。熊的學習與移動，與人類的土地管理、垃圾處理、觀光實踐與治理反應相互牽引、共同生成；同樣地，人類的治理行動，也會反過來改變熊對風險與資源的判斷。在此意義下，當熊尚未構成立即的人身威脅時，透過非致死行為調控、棲地維護與誘因管理，嘗試延後或避免撲殺，正是一種回應「既然人類參與了問題生成，便必須承擔修復責任」的治理倫理。「共存」因而成為一種必須透過制度持續協商與調整的關係管理過程。</p>
+                <p>進一步而言，日本在管理實務上的斷裂也提醒我們，除對動物行為的科學調控外，人類社會系統是否具備足夠的治理量能同樣關鍵。因此，適應性管理若要真正落實，勢必仰賴「專業治理能力」的建構，藉制度化的資源投入與專責單位的設置，將獵人、科學家、地方居民、行政單位、動物專業組織等行動者的需求與利益，經由轉譯納入穩定的治理聯盟中，而非將政策落實淪於依賴動保志工的熱情、逐漸老去的獵人經驗。唯當制度本身，包括人類行為、治理能力與資源配置，也被視為需要被管理與調整的對象時，，並被固定於明確的法規與責任架構中，適應性管理這項極具潛力的治理轉向，才有可能從理念走向具實質韌性的共存機制。</p>
+            </div>
+        </div>
+
+        <div class="section" id="footnotes">
+            <div class="section-header">
+                <h2>註腳</h2>
+                
+            </div>
+            <div class="card">
+                <div class="footnotes">
+                    <ol>
+                        <li> RIST L, CAMPBELL BM, FROST P. Adaptive management: where are we now? <em>Environmental Conservation</em>. 2013;40(1):5-18. doi:10.1017/S0376892912000240</li>
+                        <li> Allen, C., Garmestani, A. (2015). Adaptive Management. In: Allen, C., Garmestani, A. (eds) Adaptive Management of Social-Ecological Systems. Springer, Dordrecht. <a href="https://doi.org/10.1007/978-94-017-9682-8_1" target="_blank">https://doi.org/10.1007/978-94-017-9682-8_1</a></li>
+                        <li> Yoshikazu Sato. (2017). The Future of Urban Brown Bear Management in Sapporo, Hokkaido, Japan: a Review. Mammal Study, 42(1):17-30 (2017). <a href="https://doi.org/10.3106/041.042.0102" target="_blank">https://doi.org/10.3106/041.042.0102</a></li>
+                        <li> 北海道. (2017). 北海道ヒグマ管理計画 (第1期) [Hokkaido brown bear management plan (Phase 1)]. <a href="https://www.pref.hokkaido.lg.jp/fs/1/2/2/1/9/6/7/4/_/%E5%8C%97%E6%B5%B7%E9%81%93%E3%83%92%E3%82%B0%E3%83%9E%E7%AE%A1%E7%90%86%E8%A8%88%E7%94%BB(%E7%AC%AC1%E6%9C%9F)%E6%9C%AC%E6%96%87.pdf" target="_blank">https://www.pref.hokkaido.lg.jp/fs/1/2/2/1/9/6/7/4/_/%E5%8C%97%E6%B5%B7%E9%81%93%E3%83%92%E3%82%B0%E3%83%9E%E7%AE%A1%E7%90%86%E8%A8%88%E7%94%BB(%E7%AC%AC1%E6%9C%9F)%E6%9C%AC%E6%96%87.pdf</a></li>
+                        <li> 特定非営利活動法人ピッキオ. (n.d.). クマ保護管理について [關於熊的保護管理]. <a href="https://npo.picchio.jp/bear/" target="_blank">https://npo.picchio.jp/bear/</a></li>
+                        <li> 北海道. (2017). 北海道ヒグマ管理計画 (第1期) [Hokkaido brown bear management plan (Phase 1)]. <a href="https://www.pref.hokkaido.lg.jp/fs/1/2/2/1/9/6/7/4/_/%E5%8C%97%E6%B5%B7%E9%81%93%E3%83%92%E3%82%B0%E3%83%9E%E7%AE%A1%E7%90%86%E8%A8%88%E7%94%BB(%E7%AC%AC1%E6%9C%9F)%E6%9C%AC%E6%96%87.pdf" target="_blank">https://www.pref.hokkaido.lg.jp/fs/1/2/2/1/9/6/7/4/_/%E5%8C%97%E6%B5%B7%E9%81%93%E3%83%92%E3%82%B0%E3%83%9E%E7%AE%A1%E7%90%86%E8%A8%88%E7%94%BB(%E7%AC%AC1%E6%9C%9F)%E6%9C%AC%E6%96%87.pdf</a></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="section refs-section" id="references">
+            <div class="section-header">
+                <h2>參考資料</h2>
+            </div>
+            <div class="card">
+            <details class="refs-panel">
+                <summary>
+                    <div class="refs-summary-text">
+                        <h2>參考資料</h2>
+                        <p>點擊展開 / 收合。</p>
+                    </div>
+                    <span class="refs-toggle">+</span>
+                </summary>
+                <div class="refs-body">
+                    <h3>書籍與專書章節</h3>
+                    <ul>
+                        <li>Matsuda, H. (Ed.). (2021). <em>Ecological risk management: For conservation biology and ecotoxicology</em>. Springer. <a href="https://doi.org/10.1007/978-981-33-6934-4" target="_blank">https://doi.org/10.1007/978-981-33-6934-4</a></li>
+                        <li>Matsuda, H., & Muneda, K. (2021). Red list of Japanese vascular plants and environmental impact assessment. In H. Matsuda (Ed.), <em>Ecological risk management: For conservation biology and ecotoxicology</em> (pp. 137–149). Springer. <a href="https://www.google.com/search?q=https://doi.org/10.1007/978-981-33-6934-4_8" target="_blank">https://doi.org/10.1007/978-981-33-6934-4_8</a></li>
+                        <li>Matsuda, H., Maki, A., Mano, T., & Horino, S. (2021). Management of human–bear conflict. In H. Matsuda (Ed.), <em>Ecological risk management: For conservation biology and ecotoxicology</em> (pp. 247–263). Springer. <a href="https://www.google.com/search?q=https://doi.org/10.1007/978-981-33-6934-4_14" target="_blank">https://doi.org/10.1007/978-981-33-6934-4_14</a></li>
+                        <li>Rossberg, A. G., Matsuda, H., Koike, F., & Urano, K. (2021). A guideline for ecological risk management procedure. In H. Matsuda (Ed.), <em>Ecological risk management: For conservation biology and ecotoxicology</em> (pp. 297–313). Springer. <a href="https://www.google.com/search?q=https://doi.org/10.1007/978-981-33-6934-4_17" target="_blank">https://doi.org/10.1007/978-981-33-6934-4_17</a></li>
+                    </ul>
+
+                    <h3>期刊文章與學術報告</h3>
+                    <ul>
+                        <li>大井徹（2009）。ツキノワグマの出没と森林、そして人間 [Asiatic black bear appearances, forests, and humans]。森林科学，57，2–3。<a href="https://www.forestry.jp/content/images/2021/10/57.pdf" target="_blank">https://www.forestry.jp/content/images/2021/10/57.pdf</a></li>
+                        <li>山崎晃司、小池伸介（2009）。出沒をめぐるツキノワグマの生態 [Ecology of Asiatic black bears regarding intrusions]。森林科学，57，4–8。<a href="https://www.forestry.jp/content/images/2021/10/57.pdf" target="_blank">https://www.forestry.jp/content/images/2021/10/57.pdf</a></li>
+                        <li>正木隆、岡輝樹（2009）。森林の結実変動とクマの出没 [Fluctuations in forest fruiting and bear appearances]。森林科学，57，13–17。<a href="https://www.forestry.jp/content/images/2021/10/57.pdf" target="_blank">https://www.forestry.jp/content/images/2021/10/57.pdf</a></li>
+                        <li>Allen, C., & Garmestani, A. (2015). Adaptive Management. In C. Allen & A. Garmestani (Eds.), <em>Adaptive Management of Social-Ecological Systems</em>. Springer, Dordrecht. <a href="https://doi.org/10.1007/978-94-017-9682-8_1" target="_blank">https://doi.org/10.1007/978-94-017-9682-8_1</a></li>
+                        <li>RIST L, CAMPBELL BM, FROST P. (2013). Adaptive management: where are we now? <em>Environmental Conservation</em>, 40(1), 5–18. <a href="https://www.jstor.org/stable/26319094" target="_blank">https://www.jstor.org/stable/26319094</a></li>
+                        <li>Sato, Y. (2017). The future of urban brown bear management in Sapporo, Hokkaido, Japan: A review. <em>Mammal Study</em>, 42(1), 17–30. <a href="https://doi.org/10.3106/041.042.0102" target="_blank">https://doi.org/10.3106/041.042.0102</a></li>
+                        <li>Treves, A., & Naughton-Treves, L. (2005). Evaluating lethal control in the management of human–wildlife conflict. <em>Conservation Biology</em>, 19(2), 474–482. <a href="https://www.google.com/search?q=https://doi.org/10.1111/j.1523-1739.2005.00645.x" target="_blank">https://doi.org/10.1111/j.1523-1739.2005.00645.x</a></li>
+                        <li>Yoshikazu Sato. (2017). The Future of Urban Brown Bear Management in Sapporo, Hokkaido, Japan: a Review. <em>Mammal Study</em>, 42(1), 17–30. <a href="https://doi.org/10.3106/041.042.0102" target="_blank">https://doi.org/10.3106/041.042.0102</a></li>
+                    </ul>
+
+                    <h3>政府出版品與技術報告</h3>
+                    <ul>
+                        <li>黃美秀、潘怡如、林容安（2012）。臺灣黑熊分布預測模式及保育行動綱領之建立(二)（林務局保育研究系列 100-14 號）。行政院農業委員會林務局。<a href="https://www.taiwanbear.org.tw/admin/resource/files/0c2582700e97438997e406ab9517b5a5.pdf" target="_blank">https://www.taiwanbear.org.tw/admin/resource/files/0c2582700e97438997e406ab9517b5a5.pdf</a></li>
+                        <li>大井徹、中下留美子、小泉透（編）（2011）。ツキノワグマの出没メカニズムの解明と出没予測手法の開発（環境省公害防止等試験研究費成果集）。独立行政法人森林総合研究所。<a href="https://www.ffpri.go.jp/pubs/chukiseika/documents/2nd-chukiseika21.pdf" target="_blank">https://www.ffpri.go.jp/pubs/chukiseika/documents/2nd-chukiseika21.pdf</a></li>
+                        <li>北海道. (2017). 北海道ヒグマ管理計画 (第1期) [Hokkaido brown bear management plan (Phase 1)].</li>
+                        <li>特定非営利活動法人ピッキオ. (n.d.). <em>クマ保護管理について</em>. <a href="https://npo.picchio.jp/bear/" target="_blank">https://npo.picchio.jp/bear/</a></li>
+                    </ul>
+
+                    <h3>新聞媒體</h3>
+                    <ul>
+                        <li>黃詩雯（2025年11月1日）。秋田熊害頻傳！動保人士批射殺太殘忍喊「別散步、別上學」遭日網砲轟。Yahoo奇摩新聞（轉載自FTNN新聞網）。<a href="https://tw.news.yahoo.com/%E7%A7%8B%E7%94%B0%E7%86%8A%E5%AE%B3%E9%A0%BB%E5%82%B3-%E5%8B%95%E4%BF%9D%E4%BA%BA%E5%A3%AB%E6%89%B9%E5%B0%84%E6%AE%BA%E5%A4%AA%E6%AE%98%E5%BF%8D-%E5%96%8A-%E5%88%A5%E6%95%A3%E6%AD%A5-%E5%88%A5%E4%B8%8A%E5%AD%B8-072400822.html" target="_blank">新聞連結</a></li>
+                        <li>聯合新聞網（2025年10月31日）。批射殺親子熊殘忍…日動保人士喊「別散步就好」 發起拒賣秋田農產反挨轟。聯合新聞網。<a href="https://udn.com/news/story/6812/9108629" target="_blank">新聞連結</a></li>
+                        <li>梁采蘩（2025年11月8日）。動保反撲殺熊…前秋田縣知事接投訴就掛電話怒嗆「把熊送去你家」。聯合新聞網。<a href="https://udn.com/news/story/6812/9126479" target="_blank">新聞連結</a></li>
+                        <li>張雪螢（2025年11月13日）。日本熊災最新進展太嚇人，“它們開始記得人的味道”。小小天下。<a href="https://hao.cnyes.com/post/207076" target="_blank">新聞連結</a></li>
+                        <li>魯云湘（2025年11月15日）。人熊衝突的「完美風暴」：氣候、人口與治理失靈下的日本熊害危機。台灣好報。<a href="https://tw.news.yahoo.com/%E4%BA%BA%E7%86%8A%E8%A1%9D%E7%AA%81%E7%9A%84-%E5%AE%8C%E7%BE%8E%E9%A2%A8%E6%9A%B4-%E6%B0%A3%E5%80%99-%E4%BA%BA%E5%8F%A3%E8%88%87%E6%B2%BB%E7%90%86%E5%A4%B1%E9%9D%88%E4%B8%8B%E7%9A%84%E6%97%A5%E6%9C%AC%E7%86%8A%E5%AE%B3%E5%8D%B1%E6%A9%9F-%E9%AD%AF%E4%BA%91%E6%B9%98-025158249.html" target="_blank">新聞連結</a></li>
+                    </ul>
+                </div>
+            </details>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pages = Array.from(document.querySelectorAll('.page'));
+        const prev = document.getElementById('prevPage');
+        const next = document.getElementById('nextPage');
+        const dots = document.getElementById('pageDots');
+        const factorNav = document.getElementById('factorNav');
+        const factorProgress = document.getElementById('factorProgress');
+        let current = 0;
+
+        const factorLabels = [
+            '（一）人口老化與外移',
+            '（二）獵人制度崩解',
+            '（三）森林生態影響',
+            '（四）觀光客餵熊',
+            '小結：能動性'
+        ];
+
+        function renderDots() {
+            dots.innerHTML = '';
+            pages.forEach((_, idx) => {
+                const b = document.createElement('button');
+                if (idx === current) b.classList.add('active');
+                b.addEventListener('click', () => setPage(idx));
+                dots.appendChild(b);
+            });
+        }
+
+        function renderFactors() {
+            factorNav.innerHTML = '';
+            factorLabels.forEach((label, idx) => {
+                const chip = document.createElement('button');
+                chip.className = 'factor-chip';
+                chip.textContent = label;
+                if (idx === current) chip.classList.add('active');
+                chip.addEventListener('click', () => setPage(idx));
+                factorNav.appendChild(chip);
+            });
+        }
+
+        function setPage(idx) {
+            if (idx < 0 || idx >= pages.length) return;
+            pages.forEach(p => p.classList.remove('active'));
+            pages[idx].classList.add('active');
+            current = idx;
+            prev.disabled = current === 0;
+            next.disabled = current === pages.length - 1;
+            renderDots();
+            renderFactors();
+            factorProgress.style.width = `${(current) / (pages.length - 1) * 100}%`;
+        }
+
+        prev.addEventListener('click', () => setPage(current - 1));
+        next.addEventListener('click', () => setPage(current + 1));
+        renderDots();
+        renderFactors();
+        setPage(0);
+
+        // Debate canvas (section 3)
+        const debateChips = Array.from(document.querySelectorAll('.debate-chip'));
+        const debateCards = Array.from(document.querySelectorAll('.debate-card'));
+        const debateToggle = document.getElementById('debateToggle');
+        const debateProgress = document.getElementById('debateProgress');
+        let debateExpandAll = false;
+
+        function updateDebateProgress(activeIdx) {
+            if (!debateProgress) return;
+            const denom = Math.max(debateChips.length - 1, 1);
+            debateProgress.style.width = `${(activeIdx / denom) * 100}%`;
+        }
+
+        function setDebate(targetId, force = false) {
+            if ((!force && debateExpandAll) || !debateCards.length) return;
+            let activeIdx = 0;
+            debateCards.forEach((card, idx) => {
+                const active = card.id === targetId;
+                if (active) activeIdx = idx;
+                card.classList.toggle('active', active);
+            });
+            debateChips.forEach((chip, idx) => {
+                const active = chip.dataset.target === targetId;
+                if (active) activeIdx = idx;
+                chip.classList.toggle('active', active);
+            });
+            updateDebateProgress(activeIdx);
+        }
+        debateChips.forEach(chip => chip.addEventListener('click', () => setDebate(chip.dataset.target, true)));
+
+        // Allow clicking the card header to toggle expand/collapse
+        const debateHeads = Array.from(document.querySelectorAll('.debate-card .debate-head'));
+        debateHeads.forEach(head => {
+            head.addEventListener('click', () => {
+                const card = head.closest('.debate-card');
+                if (!card) return;
+                
+                // If current card is already active and not in expand-all mode, collapse it
+                if (card.classList.contains('active') && !debateExpandAll) {
+                    card.classList.remove('active');
+                    debateChips.forEach(chip => {
+                        if (chip.dataset.target === card.id) {
+                            chip.classList.remove('active');
+                        }
+                    });
+                    updateDebateProgress(0);
+                } else {
+                    // Otherwise expand this card
+                    debateExpandAll = false;
+                    debateToggle.textContent = '展開全部';
+                    setDebate(card.id, true);
+                }
+            });
+        });
+
+        if (debateToggle) {
+            debateToggle.addEventListener('click', () => {
+                debateExpandAll = !debateExpandAll;
+                if (debateExpandAll) {
+                    debateToggle.textContent = '回到單一聚焦';
+                    debateCards.forEach(card => card.classList.add('active'));
+                    updateDebateProgress(debateChips.length - 1);
+                } else {
+                    debateToggle.textContent = '展開全部';
+                    debateCards.forEach(card => card.classList.remove('active'));
+                    if (debateCards[0]) {
+                        setDebate(debateCards[0].id);
+                    }
+                }
+            });
+        }
+
+        if (debateCards.length) {
+            setDebate(debateCards[0].id);
+        }
+
+        // Management Accordion (section 4)
+        const managementHeaders = Array.from(document.querySelectorAll('.management-header'));
+        managementHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const item = this.closest('.management-item');
+                if (item) {
+                    item.classList.toggle('active');
+                }
+            });
+        });
+        // Footer is static; no script needed
+    </script>
+    <footer class="site-footer">網站由AI協助搭建</footer>
+</body>
+</html>
